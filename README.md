@@ -1,2 +1,2 @@
 # ZKSYNC-ERA
-ZKSync Era Wallet - Address Display
+ZKSync Era Wallet - 0x0F1c3046F8398f805ca52eC6DdFE678ca286Dd05
