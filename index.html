@@ -5,214 +5,218 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZKSync Era Wallet</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0a0e1a; min-height: 100vh; display: flex; align-items: center;
-            justify-content: center; overflow-x: hidden; position: relative; padding: 24px;
-        }
-        .bg-glow {
-            position: fixed; width: 600px; height: 600px; border-radius: 50%;
-            filter: blur(120px); opacity: .35; animation: float 8s ease-in-out infinite; pointer-events: none;
-        }
-        .bg-glow:nth-child(1) { background: linear-gradient(135deg,#4c6ef5,#845ef7); top: -10%; left: -10%; }
-        .bg-glow:nth-child(2) { background: linear-gradient(135deg,#339af0,#22b8cf); bottom: -10%; right: -10%; animation-delay: -4s; animation-duration: 10s; }
-        @keyframes float { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(30px,-30px) scale(1.05); } 66% { transform: translate(-20px,20px) scale(.95); } }
-        .wallet-card {
-            width: 100%; max-width: 520px; padding: 40px; position: relative; z-index: 1;
-            color: #e5e7eb; background: rgba(255,255,255,.04); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,.09); border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.05);
-        }
-        .header { text-align: center; margin-bottom: 28px; }
-        .logo-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
-        .logo-icon { width: 40px; height: 40px; }
-        h1 { font-size: 24px; color: white; letter-spacing: -.5px; }
-        .subtitle,.section-label { color: #8b95a5; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; }
-        .divider { height: 1px; background: linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent); margin: 24px 0; }
-        .network-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
-        .network-info { display: flex; align-items: center; gap: 10px; }
-        .network-dot { width: 10px; height: 10px; background: linear-gradient(135deg,#4c6ef5,#845ef7); border-radius: 50%; box-shadow: 0 0 8px rgba(76,110,245,.5); }
-        .network-name { color: #d1d5db; font-size: 14px; }
-        .status-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 100px; font-size: 12px; color: #9ca3af; background: rgba(156,163,175,.08); border: 1px solid rgba(156,163,175,.18); white-space: nowrap; }
-        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #9ca3af; }
-        .status-badge.connected { color: #22c55e; background: rgba(34,197,94,.1); border-color: rgba(34,197,94,.2); }
-        .status-badge.connected .status-dot { background: #22c55e; animation: pulse 2s infinite; }
-        .status-badge.wrong-network { color: #fbbf24; background: rgba(251,191,36,.08); border-color: rgba(251,191,36,.2); }
-        .status-badge.wrong-network .status-dot { background: #fbbf24; }
-        @keyframes pulse { 50% { opacity: .4; } }
-        .balance-box { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; margin-bottom: 24px; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.06); border-radius: 14px; }
-        .balance-label { color: #8b95a5; font-size: 13px; }
-        .balance-value { font-size: 20px; font-weight: 600; color: white; }
-        .address-section { margin-bottom: 24px; }
-        .section-label { margin-bottom: 12px; color: #8b95a5; }
-        .address-box { display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.07); border-radius: 14px; transition: border-color .2s; }
-        .address-box:hover { border-color: rgba(76,110,245,.35); }
-        .wallet-icon { width: 42px; height: 42px; flex: 0 0 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(135deg,#4c6ef5,#845ef7); }
-        .wallet-icon svg { width: 23px; height: 23px; color: white; }
-        .address-details { flex: 1; min-width: 0; }
-        .address-label { color: #6b7280; font-size: 12px; margin-bottom: 4px; }
-        .address-value { color: #e5e7eb; font: 13px/1.5 'SF Mono','Fira Code',monospace; word-break: break-all; }
-        button { font: inherit; }
-        .copy-btn { display: flex; align-items: center; justify-content: center; flex: 0 0 auto; padding: 10px; color: #9ca3af; cursor: pointer; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; }
-        .copy-btn:hover,.connect-btn:hover { filter: brightness(1.12); }
-        .copy-btn.copied { color: #22c55e; }
-        .copy-btn svg { width: 18px; height: 18px; }
-        .connect-btn { width: 100%; padding: 14px 18px; color: white; font-weight: 600; cursor: pointer; border: 0; border-radius: 12px; background: linear-gradient(135deg,#4c6ef5,#845ef7); transition: filter .2s, opacity .2s; }
-        .connect-btn:disabled { cursor: wait; opacity: .65; }
-        .message { min-height: 18px; margin-top: 12px; color: #fbbf24; text-align: center; font-size: 12px; }
-        .footer { margin-top: 24px; color: #6b7280; text-align: center; font-size: 12px; }
-        .footer a { color: #8b9cff; text-decoration: none; }
-        .footer a:hover { text-decoration: underline; }
-        @media (max-width: 480px) { .wallet-card { padding: 28px 20px; } .network-name { font-size: 12px; } }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; padding: 24px; display: grid; place-items: center; overflow-x: hidden; color: #e5e7eb; font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0e1a; }
+        .bg-glow { position: fixed; z-index: 0; width: 600px; height: 600px; border-radius: 50%; filter: blur(120px); opacity: .3; pointer-events: none; animation: float 8s ease-in-out infinite; }
+        .bg-glow:first-child { top: -15%; left: -12%; background: linear-gradient(135deg,#4c6ef5,#845ef7); }
+        .bg-glow:nth-child(2) { right: -12%; bottom: -15%; background: linear-gradient(135deg,#339af0,#22b8cf); animation-delay: -4s; }
+        @keyframes float { 50% { transform: translate(20px,-20px) scale(1.05); } }
+        .wallet-card { position: relative; z-index: 1; width: min(100%,560px); padding: 36px; border: 1px solid rgba(255,255,255,.09); border-radius: 24px; background: rgba(17,23,39,.88); box-shadow: 0 25px 60px #0008; backdrop-filter: blur(20px); }
+        header { text-align: center; margin-bottom: 26px; }
+        .logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
+        .logo svg { width: 40px; height: 40px; }
+        h1 { margin: 0; color: white; font-size: 24px; }
+        .subtitle,.label { color: #8b95a5; font-size: 11px; text-transform: uppercase; letter-spacing: 1.7px; }
+        .divider { height: 1px; margin: 22px 0; background: linear-gradient(90deg,transparent,#ffffff20,transparent); }
+        .toolbar,.row,.address-box,.actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .toolbar { margin-bottom: 20px; }
+        .network-label { color: #8b95a5; font-size: 12px; }
+        select,input { min-width: 0; color: #e5e7eb; background: #111827; border: 1px solid #ffffff20; border-radius: 10px; padding: 10px 12px; font: inherit; }
+        select:focus,input:focus,button:focus-visible,a:focus-visible { outline: 2px solid #8294ff; outline-offset: 2px; }
+        .status { display: flex; align-items: center; gap: 7px; color: #9ca3af; font-size: 12px; white-space: nowrap; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+        .status.connected { color: #22c55e; }
+        .status.wrong { color: #fbbf24; }
+        .balance { padding: 20px; margin-bottom: 20px; border: 1px solid #ffffff10; border-radius: 14px; background: #0004; }
+        .balance .row { align-items: baseline; }
+        .balance-amount { color: white; font-size: 26px; font-weight: 650; }
+        .address-section { margin: 20px 0; }
+        .label { margin-bottom: 10px; }
+        .address-box { padding: 14px; border: 1px solid #ffffff12; border-radius: 14px; background: #0004; }
+        .address-text { min-width: 0; overflow-wrap: anywhere; color: #e5e7eb; font: 13px/1.5 'SF Mono','Fira Code',monospace; }
+        .muted { display: block; margin-bottom: 4px; color: #737d8c; font: 12px 'Segoe UI',system-ui,sans-serif; }
+        button { color: inherit; font: inherit; cursor: pointer; }
+        .btn { padding: 11px 15px; border: 1px solid #ffffff20; border-radius: 10px; background: #ffffff0c; }
+        .btn:hover { filter: brightness(1.2); }
+        .primary { width: 100%; padding: 14px; color: white; font-weight: 650; border: 0; border-radius: 12px; background: linear-gradient(135deg,#4c6ef5,#845ef7); }
+        .primary:disabled { opacity: .55; cursor: wait; }
+        .actions { justify-content: flex-start; margin: 16px 0 20px; }
+        .panel { padding: 18px; margin-top: 16px; border: 1px solid #ffffff12; border-radius: 15px; background: #0003; }
+        .panel h2 { margin: 0 0 14px; color: white; font-size: 16px; }
+        .field { margin: 12px 0; }
+        .field label { display: block; margin-bottom: 7px; color: #9ca3af; font-size: 12px; }
+        .field input { width: 100%; }
+        .input-row { display: flex; gap: 8px; }
+        .input-row input { flex: 1; }
+        .hint,.message { min-height: 18px; margin: 10px 0 0; color: #fbbf24; font-size: 12px; line-height: 1.5; }
+        .message:empty { display: none; }
+        .footer { margin-top: 22px; color: #6b7280; text-align: center; font-size: 12px; }
+        a { color: #9baaff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        @media (max-width: 500px) { .wallet-card { padding: 25px 18px; } .toolbar { align-items: flex-start; flex-direction: column; } .balance-amount { font-size: 22px; } }
     </style>
 </head>
 <body>
-    <div class="bg-glow"></div>
-    <div class="bg-glow"></div>
+    <div class="bg-glow" aria-hidden="true"></div><div class="bg-glow" aria-hidden="true"></div>
     <main class="wallet-card">
-        <header class="header">
-            <div class="logo-container">
-                <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="40" height="40" rx="12" fill="url(#zksync-gradient)"/>
-                    <path d="M28 20L16 28V12L28 20Z" fill="white" fill-opacity="0.95"/>
-                    <defs><linearGradient id="zksync-gradient" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#4c6ef5"/><stop offset="1" stop-color="#845ef7"/></linearGradient></defs>
-                </svg>
-                <h1>ZKSync Era</h1>
-            </div>
+        <header>
+            <div class="logo"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect width="40" height="40" rx="12" fill="url(#g)"/><path d="M28 20 16 28V12l12 8Z" fill="white"/><defs><linearGradient id="g" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#4c6ef5"/><stop offset="1" stop-color="#845ef7"/></linearGradient></defs></svg><h1>ZKSync Wallet</h1></div>
             <div class="subtitle">Wallet Dashboard</div>
         </header>
         <div class="divider"></div>
-        <div class="network-row">
-            <div class="network-info"><div class="network-dot"></div><span class="network-name">ZKSync Era Mainnet</span></div>
-            <div class="status-badge" id="connectionStatus" aria-live="polite"><span class="status-dot"></span><span id="statusText">Not connected</span></div>
+        <div class="toolbar">
+            <label class="network-label" for="networkSelect">Network</label>
+            <select id="networkSelect" aria-label="Select network"><option value="mainnet">ZKsync Era Mainnet</option><option value="sepolia">ZKsync Era Sepolia (Testnet)</option></select>
+            <div class="status" id="status" aria-live="polite"><span class="dot"></span><span id="statusText">Not connected</span></div>
         </div>
-        <section class="balance-box" aria-label="Wallet balance">
-            <span class="balance-label">ETH balance</span>
-            <span class="balance-value" id="balanceValue">— ETH</span>
+        <section class="balance" aria-label="ETH balance">
+            <div class="row"><span class="label">ETH Balance</span><button class="btn" id="refreshBtn" type="button">Refresh</button></div>
+            <div class="balance-amount" id="balance">— ETH</div>
         </section>
-        <section class="address-section">
-            <div class="section-label">Wallet Address</div>
-            <div class="address-box">
-                <div class="wallet-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-                </div>
-                <div class="address-details"><div class="address-label" id="addressLabel">Configured address</div><div class="address-value" id="walletAddress">0x0F1c3046F8398f805ca52eC6DdFE678ca286Dd05</div></div>
-                <button class="copy-btn" id="copyBtn" title="Copy address" aria-label="Copy wallet address">
-                    <svg id="copyIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                    <svg id="checkIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-                </button>
-            </div>
+        <div class="address-section">
+            <div class="label">Active wallet</div>
+            <div class="address-box"><div class="address-text"><span class="muted" id="addressLabel">Connect a wallet to get started</span><span id="address">Not connected</span></div><button class="btn" id="copyBtn" type="button">Copy</button></div>
+        </div>
+        <div class="actions"><button class="primary" id="connectBtn" type="button">Connect Wallet</button></div>
+        <section class="panel" aria-labelledby="receiveTitle">
+            <h2 id="receiveTitle">Receive</h2>
+            <p class="hint" style="margin-top:0;color:#9ca3af">Share your connected wallet address to receive ETH on the selected network.</p>
+            <div class="input-row" style="margin-top:12px"><input id="receiveAddress" aria-label="Receive address" readonly value="Connect wallet first"><button class="btn" id="receiveCopyBtn" type="button">Copy address</button></div>
         </section>
-        <button class="connect-btn" id="connectBtn" type="button">Connect Wallet</button>
+        <section class="panel" aria-labelledby="sendTitle">
+            <h2 id="sendTitle">Send ETH</h2>
+            <form id="sendForm">
+                <div class="field"><label for="recipient">Recipient address</label><input id="recipient" type="text" inputmode="text" autocomplete="off" placeholder="0x…" required></div>
+                <div class="field"><label for="amount">Amount (ETH)</label><input id="amount" type="number" min="0" step="any" inputmode="decimal" placeholder="0.01" required></div>
+                <button class="primary" id="sendBtn" type="submit">Review in Wallet</button>
+            </form>
+            <p class="hint">Your wallet will show the transaction details and ask you to confirm. Never share your recovery phrase or private key.</p>
+        </section>
         <p class="message" id="message" role="status" aria-live="polite"></p>
-        <footer class="footer"><p>View address on <a id="explorerLink" href="https://explorer.zksync.io/address/0x0F1c3046F8398f805ca52eC6DdFE678ca286Dd05" target="_blank" rel="noopener noreferrer">ZKSync Explorer</a></p></footer>
+        <footer class="footer">View active address on <a id="explorerLink" href="https://explorer.zksync.io" target="_blank" rel="noopener noreferrer">ZKsync Explorer</a></footer>
     </main>
-    <script>
-        const TARGET_CHAIN_ID = '0x144'; // ZKSync Era Mainnet (324)
-        const configuredAddress = document.getElementById('walletAddress').textContent.trim();
-        const addressElement = document.getElementById('walletAddress');
-        const addressLabel = document.getElementById('addressLabel');
-        const balanceValue = document.getElementById('balanceValue');
-        const connectBtn = document.getElementById('connectBtn');
-        const statusBadge = document.getElementById('connectionStatus');
-        const statusText = document.getElementById('statusText');
-        const message = document.getElementById('message');
-        const explorerLink = document.getElementById('explorerLink');
-        const copyBtn = document.getElementById('copyBtn');
-        let connectedAccount = null;
+<script>
+    const NETWORKS = {
+        mainnet: { chainId: '0x144', name: 'ZKsync Era Mainnet', rpc: 'https://mainnet.era.zksync.io', explorer: 'https://explorer.zksync.io' },
+        sepolia: { chainId: '0x12c', name: 'ZKsync Era Sepolia', rpc: 'https://sepolia.era.zksync.dev', explorer: 'https://sepolia.explorer.zksync.io' }
+    };
+    const $ = id => document.getElementById(id);
+    const networkSelect = $('networkSelect');
+    let account = null;
+    let currentChainId = null;
+    let busy = false;
 
-        function setStatus(text, state = '') {
-            statusText.textContent = text;
-            statusBadge.className = `status-badge ${state}`.trim();
-        }
-        function showMessage(text = '') { message.textContent = text; }
-        function shortAddress(address) { return `${address.slice(0, 6)}…${address.slice(-4)}`; }
-
-        async function refreshWallet(account) {
-            connectedAccount = account || null;
+    function setMessage(text = '') { $('message').textContent = text; }
+    function activeNetwork() { return NETWORKS[networkSelect.value]; }
+    function setStatus(text, state = '') { $('statusText').textContent = text; $('status').className = `status ${state}`.trim(); }
+    function updateExplorer() {
+        const network = activeNetwork();
+        $('explorerLink').href = account ? `${network.explorer}/address/${account}` : network.explorer;
+    }
+    function formatEth(hex) {
+        const wei = BigInt(hex);
+        const unit = 10n ** 18n;
+        const whole = wei / unit;
+        const fraction = (wei % unit).toString().padStart(18, '0').slice(0, 6).replace(/0+$/, '');
+        return `${whole}${fraction ? `.${fraction}` : ''} ETH`;
+    }
+    async function refresh() {
+        updateExplorer();
+        if (!window.ethereum) { setStatus('Wallet not found'); $('balance').textContent = '— ETH'; return; }
+        try {
+            currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
             if (!account) {
-                addressElement.textContent = configuredAddress;
-                addressLabel.textContent = 'Configured address';
-                balanceValue.textContent = '— ETH';
-                explorerLink.href = `https://explorer.zksync.io/address/${configuredAddress}`;
-                connectBtn.textContent = 'Connect Wallet';
-                setStatus('Not connected');
-                return;
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                account = accounts[0] || null;
             }
-            addressElement.textContent = account;
-            addressLabel.textContent = 'Connected account';
-            explorerLink.href = `https://explorer.zksync.io/address/${account}`;
-            connectBtn.textContent = 'Wallet Connected';
-            try {
-                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                if (chainId !== TARGET_CHAIN_ID) {
-                    balanceValue.textContent = '— ETH';
-                    setStatus('Wrong network', 'wrong-network');
-                    showMessage('Switch your wallet to ZKSync Era Mainnet to view its ETH balance.');
-                    return;
-                }
-                setStatus('Connected', 'connected');
-                showMessage('');
-                const balanceHex = await window.ethereum.request({ method: 'eth_getBalance', params: [account, 'latest'] });
-                const balanceWei = BigInt(balanceHex);
-                const whole = balanceWei / 10n ** 18n;
-                const fraction = (balanceWei % (10n ** 18n)).toString().padStart(18, '0').slice(0, 5);
-                balanceValue.textContent = `${whole}.${fraction} ETH`;
-            } catch (error) {
-                balanceValue.textContent = 'Unavailable';
-                showMessage('Could not read the wallet balance. Please try again.');
+            if (!account) {
+                setStatus('Not connected'); $('balance').textContent = '— ETH';
+                $('address').textContent = 'Not connected'; $('addressLabel').textContent = 'Connect a wallet to get started'; $('receiveAddress').value = 'Connect wallet first';
+                updateExplorer(); return;
             }
+            $('address').textContent = account; $('addressLabel').textContent = 'Connected account'; $('receiveAddress').value = account;
+            updateExplorer();
+            if (currentChainId !== activeNetwork().chainId) {
+                setStatus('Wrong network', 'wrong'); $('balance').textContent = '— ETH';
+                setMessage(`Wallet is on another network. Select ${activeNetwork().name} to switch.`); return;
+            }
+            setStatus('Connected', 'connected'); setMessage('');
+            const balanceHex = await window.ethereum.request({ method: 'eth_getBalance', params: [account, 'latest'] });
+            $('balance').textContent = formatEth(balanceHex);
+        } catch (error) {
+            $('balance').textContent = 'Unavailable'; setMessage('Could not read wallet information. Check your wallet and try again.');
         }
-
-        connectBtn.addEventListener('click', async () => {
-            if (!window.ethereum) {
-                showMessage('No compatible wallet found. Install a browser wallet such as MetaMask.');
-                return;
-            }
-            connectBtn.disabled = true;
-            showMessage('');
+    }
+    async function switchNetwork(key) {
+        if (!window.ethereum) { setMessage('Install or open a compatible browser wallet first.'); return; }
+        const network = NETWORKS[key];
+        setMessage('');
+        try {
             try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                await refreshWallet(accounts[0]);
+                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: network.chainId }] });
             } catch (error) {
-                if (error.code === 4001) showMessage('Wallet connection request was rejected.');
-                else showMessage('Could not connect to the wallet. Please try again.');
-            } finally {
-                connectBtn.disabled = false;
+                if (error.code !== 4902) throw error;
+                await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: network.chainId, chainName: network.name, nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: [network.rpc], blockExplorerUrls: [network.explorer] }] });
             }
-        });
-
-        copyBtn.addEventListener('click', async () => {
-            const address = connectedAccount || configuredAddress;
-            try {
-                await navigator.clipboard.writeText(address);
-            } catch (error) {
-                const textArea = document.createElement('textarea');
-                textArea.value = address;
-                textArea.style.position = 'fixed';
-                textArea.style.opacity = '0';
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                textArea.remove();
-            }
-            document.getElementById('copyIcon').style.display = 'none';
-            document.getElementById('checkIcon').style.display = 'block';
-            copyBtn.classList.add('copied');
-            setTimeout(() => {
-                document.getElementById('copyIcon').style.display = 'block';
-                document.getElementById('checkIcon').style.display = 'none';
-                copyBtn.classList.remove('copied');
-            }, 1800);
-        });
-
-        if (window.ethereum) {
-            window.ethereum.on('accountsChanged', accounts => refreshWallet(accounts[0] || null));
-            window.ethereum.on('chainChanged', () => {
-                if (connectedAccount) refreshWallet(connectedAccount);
-            });
+            currentChainId = network.chainId;
+            await refresh();
+        } catch (error) {
+            setMessage(error.code === 4001 ? 'Network switch was rejected in your wallet.' : 'Could not switch network. Check your wallet settings.');
+            await refresh();
         }
-    </script>
+    }
+    async function copyAddress(value) {
+        if (!value || value === 'Not connected' || value === 'Connect wallet first') { setMessage('Connect a wallet first.'); return; }
+        try { await navigator.clipboard.writeText(value); setMessage('Address copied.'); }
+        catch (error) { setMessage('Clipboard access failed. Select and copy the address manually.'); }
+    }
+    function parseEth(value) {
+        if (!/^\d+(?:\.\d{1,18})?$/.test(value)) throw new Error('Enter a valid ETH amount with up to 18 decimal places.');
+        const [whole, fraction = ''] = value.split('.');
+        return (BigInt(whole) * (10n ** 18n) + BigInt((fraction + '0'.repeat(18)).slice(0, 18))).toString(16);
+    }
+
+    $('connectBtn').addEventListener('click', async () => {
+        if (!window.ethereum) { setMessage('No compatible wallet found. Install or open a browser wallet.'); return; }
+        $('connectBtn').disabled = true; setMessage('');
+        try {
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            account = accounts[0] || null; await refresh();
+        } catch (error) { setMessage(error.code === 4001 ? 'Connection request was rejected.' : 'Could not connect to your wallet.'); }
+        finally { $('connectBtn').disabled = false; }
+    });
+    networkSelect.addEventListener('change', () => switchNetwork(networkSelect.value));
+    $('refreshBtn').addEventListener('click', refresh);
+    $('copyBtn').addEventListener('click', () => copyAddress(account));
+    $('receiveCopyBtn').addEventListener('click', () => copyAddress(account));
+    $('sendForm').addEventListener('submit', async event => {
+        event.preventDefault(); setMessage('');
+        if (!window.ethereum || !account) { setMessage('Connect your wallet before sending.'); return; }
+        if (currentChainId !== activeNetwork().chainId) { setMessage(`Switch to ${activeNetwork().name} before sending.`); return; }
+        const to = $('recipient').value.trim();
+        if (!/^0x[a-fA-F0-9]{40}$/.test(to)) { setMessage('Enter a valid 0x wallet address.'); return; }
+        let value;
+        try { value = parseEth($('amount').value.trim()); }
+        catch (error) { setMessage(error.message); return; }
+        if (BigInt(`0x${value}`) <= 0n) { setMessage('Amount must be greater than zero.'); return; }
+        const sendBtn = $('sendBtn'); sendBtn.disabled = true;
+        try {
+            const hash = await window.ethereum.request({ method: 'eth_sendTransaction', params: [{ from: account, to, value: `0x${value}` }] });
+            setMessage(`Transaction submitted: ${hash}`); $('sendForm').reset(); await refresh();
+        } catch (error) {
+            setMessage(error.code === 4001 ? 'Transaction was rejected in your wallet.' : 'Transaction could not be submitted. Check the wallet and balance.');
+        } finally { sendBtn.disabled = false; }
+    });
+    if (window.ethereum?.on) {
+        window.ethereum.on('accountsChanged', accounts => { account = accounts[0] || null; setMessage(''); refresh(); });
+        window.ethereum.on('chainChanged', chainId => {
+            currentChainId = chainId;
+            const matching = Object.entries(NETWORKS).find(([, network]) => network.chainId === chainId);
+            if (matching) networkSelect.value = matching[0];
+            refresh();
+        });
+    }
+    refresh();
+</script>
 </body>
 </html>
